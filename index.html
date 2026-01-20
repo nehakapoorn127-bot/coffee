@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Coffee Menu with Quantity and Bill</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f0e6;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #6f4e37;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .marquee {
+      width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      box-sizing: border-box;
+      border-top: 2px solid #d2691e;
+      border-bottom: 2px solid #d2691e;
+      background: #f0e5d8;
+      color: #6f4e37;
+      font-weight: bold;
+      font-size: 20px;
+      padding: 10px 0;
+      margin-top: 5px;
+    }
+    .marquee span {
+      display: inline-block;
+      padding-left: 100%;
+      animation: marqueeAnim 15s linear infinite;
+    }
+    @keyframes marqueeAnim {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-100%); }
+    }
+    .menu {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .coffee-item {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      width: 200px;
+      text-align: center;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .coffee-item img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+    .coffee-name {
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 10px;
+      color: #4b2e00;
+    }
+    .quantity-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .quantity-controls button {
+      background-color: #d2691e;
+      border: none;
+      color: white;
+      font-weight: bold;
+      font-size: 20px;
+      width: 30px;
+      height: 30px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .quantity-controls button:hover {
+      background-color: #a0522d;
+    }
+    .quantity-display {
+      font-size: 18px;
+      min-width: 25px;
+      text-align: center;
+    }
+    button.place-order-btn {
+      background-color: #d2691e;
+      color: white;
+      font-size: 14px;
+      padding: 8px 5px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-top: auto;
+    }
+    button.place-order-btn:hover {
+      background-color: #a0522d;
+    }
+    section.contact {
+      background-color: #6f4e37;
+      color: white;
+      padding: 20px;
+      max-width: 600px;
+      margin: 40px auto 20px;
+      border-radius: 8px;
+    }
+    section.contact h2 {
+      margin-top: 0;
+      text-align: center;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    input, textarea {
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    footer {
+      text-align: center;
+      padding: 15px;
+      font-size: 14px;
+      color: #555;
+    }
+    #billSummary {
+      max-width: 600px;
+      margin: 20px auto;
+      background: #fff5e6;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px #d2691e88;
+      font-family: monospace;
+      color: #4b2e00;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Bean & Brew Cafe</h1>
+    <div class="marquee"><span>Welcome to Bean & Brew Cafe — Fresh Coffee, Fresh Start! ☕️✨</span></div>
+  </header>
+
+  <main>
+    <div class="menu" id="coffeeMenu"></div>
+
+    <section id="billSummary" style="display:none;">
+      <h2>Bill Summary</h2>
+      <pre id="billDetails"></pre>
+    </section>
+
+    <section class="contact">
+      <h2>Contact Us</h2>
+      <form id="contactForm">
+        <input type="text" id="name" placeholder="Your Name" required />
+        <input type="email" id="email" placeholder="Your Email" required />
+        <textarea id="message" rows="4" placeholder="Your Message" required></textarea>
+        <button type="submit">Send</button>
+      </form>
+      <p id="formResponse" style="text-align:center; margin-top:10px;"></p>
+    </section>
+  </main>
+
+  <footer>
+    &copy; 2026  Bean & Brew Cafe
+  </footer>
+
+  <script>
+    const coffees = [
+      { name: "Espresso", img: "https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=400&q=80", price: 5 },
+      { name: "Cappuccino", img: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=400&q=80", price: 7 },
+      { name: "Latte", img: "https://images.unsplash.com/photo-1512568400610-62da28bc8a13?auto=format&fit=crop&w=400&q=80", price: 7 },
+      { name: "Mocha", img: "https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&w=400&q=80", price: 7 },
+      { name: "Americano", img: "https://images.unsplash.com/photo-1470337458703-46ad1756a187?auto=format&fit=crop&w=400&q=80", price: 5 },
+      { name: "Macchiato", img: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=400&q=80", price: 7 }
+    ];
+
+    const menuContainer = document.getElementById('coffeeMenu');
+    const billSection = document.getElementById('billSummary');
+    const billDetails = document.getElementById('billDetails');
+
+    // Track quantities for each coffee (initialized to zero)
+    const quantities = Array(coffees.length).fill(0);
+
+    function renderMenu() {
+      menuContainer.innerHTML = '';
+
+      coffees.forEach((coffee, index) => {
+        const div = document.createElement('div');
+        div.className = 'coffee-item';
+        div.innerHTML = `
+          <img src="${coffee.img}" alt="${coffee.name}" />
+          <div class="coffee-name">${coffee.name} - <span style="color:#d2691e;">$${coffee.price.toFixed(2)}</span></div>
+          <div class="quantity-controls">
+            <button onclick="decreaseQty(${index})">-</button>
+            <div class="quantity-display" id="qty-${index}">${quantities[index]}</div>
+            <button onclick="increaseQty(${index})">+</button>
+          </div>
+          <button class="place-order-btn" onclick="placeOrder(${index})">Place Order</button>
+        `;
+        menuContainer.appendChild(div);
+      });
+    }
+
+    function increaseQty(index) {
+      quantities[index]++;
+      document.getElementById(`qty-${index}`).textContent = quantities[index];
+      updateBill();
+    }
+
+    function decreaseQty(index) {
+      if (quantities[index] > 0) {
+        quantities[index]--;
+        document.getElementById(`qty-${index}`).textContent = quantities[index];
+        updateBill();
+      }
+    }
+
+    function updateBill() {
+      const taxRate = 0.10; // 10%
+      let subtotal = 0;
+
+      coffees.forEach((coffee, index) => {
+        subtotal += coffee.price * quantities[index];
+      });
+
+      if(subtotal === 0) {
+        billSection.style.display = 'none';
+        return;
+      }
+
+      const tax = subtotal * taxRate;
+      const total = subtotal + tax;
+
+      let billText = '';
+      coffees.forEach((coffee, index) => {
+        if(quantities[index] > 0) {
+          billText += `${coffee.name} x ${quantities[index]} = $${(coffee.price * quantities[index]).toFixed(2)}\n`;
+        }
+      });
+      billText += `\nSubtotal: $${subtotal.toFixed(2)}\nTax (10%): $${tax.toFixed(2)}\nTotal: $${total.toFixed(2)}`;
+
+      billDetails.textContent = billText;
+      billSection.style.display = 'block';
+    }
+
+    function placeOrder(index) {
+      if(quantities[index] === 0) {
+        alert('Please increase the quantity before placing an order.');
+        return;
+      }
+      const coffee = coffees[index];
+      const choice = prompt(`Place order for ${coffee.name} x ${quantities[index]}. Enter '1' for Dine In or '2' for Take Away:`);
+
+      if(choice === '1' || choice === '2') {
+        const orderType = choice === '1' ? "Dine In" : "Take Away";
+        alert(`Order placed for ${coffee.name} x ${quantities[index]} (${orderType}). Thank you!`);
+
+        // Reset quantity after ordering
+        quantities[index] = 0;
+        document.getElementById(`qty-${index}`).textContent = '0';
+        updateBill();
+
+        // Here you could send order data to a backend or SQL database
+      } else {
+        alert('Invalid option. Please enter 1 or 2.');
+      }
+    }
+
+    // Contact form handling
+    const form = document.getElementById('contactForm');
+    const response = document.getElementById('formResponse');
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const message = document.getElementById('message').value.trim();
+
+      if(name && email && message) {
+        response.style.color = 'lightgreen';
+        response.textContent = `Thank you, ${name}! Your message has been received. We'll get back to you at ${email}.`;
+
+        // Reset form
+        form.reset();
+      } else {
+        response.style.color = 'lightcoral';
+        response.textContent = 'Please fill in all fields.';
+      }
+    });
+
+    renderMenu();
+  </script>
+</body>
+</html>
